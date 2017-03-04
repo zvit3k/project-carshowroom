@@ -161,6 +161,7 @@ public class Main {
 		double maxEngineCapacity = sc.nextDouble();
 		sc.nextLine();
 		System.out.println("Enter the required equipment: ");
+		
 		String equipment = sc.nextLine();
 		sc.close();
 		
@@ -169,12 +170,33 @@ public class Main {
 
 			@Override
 			public boolean test(Car c) {
-				
-				return false;
+				ENGINETYPE type = null;
+				if(engineType.equals("DIESEL")){
+					type = ENGINETYPE.DIESEL;
+				} else if(engineType.equals("PETROL")){
+					type = ENGINETYPE.PETROL;
+				} else{
+					type = null;
+				}
+				return c.getEngine().getType()==type;
 			}
 			
 		};
+		
+		Predicate<Car> engineCapacityPred = (Car c)-> c.getEngine().getEngineCapacity()>minEngineCapacity&&c.getEngine().getEngineCapacity()<maxEngineCapacity;
+	/*	Predicate<Car> equipmentPred = new Predicate<Car>(){
+
+			@Override
+			public boolean test(Car c) {
+				for(String s: )){
+					if(s.equals(equipment)){
+						return true;
+					}
+				}
+				return true;
+			}
 			
+		};*/
 		return null;
 
 	}
