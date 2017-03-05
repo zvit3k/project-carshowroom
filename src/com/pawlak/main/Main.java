@@ -3,6 +3,7 @@ package com.pawlak.main;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
@@ -13,6 +14,7 @@ import com.pawlak.classes.CARRIAGETYPE;
 import com.pawlak.classes.Car;
 import com.pawlak.classes.CarSalon;
 import com.pawlak.classes.ENGINETYPE;
+import com.pawlak.classes.EQUIPMENT;
 
 public class Main {
 
@@ -37,7 +39,7 @@ public class Main {
 		// ENGINETYPE.DIESEL).forEach(System.out::println);
 		salon.getCars().forEach(System.out::println);
 		System.out.println("--------------");
-
+		filterByUserConfiguration(salon.getCars()).forEach(System.out::println);;
 	}
 
 	public static List<String> getCarsFromFiles(int files) {
@@ -145,59 +147,85 @@ public class Main {
 	}
 
 	public static List<Car> filterByUserConfiguration(Set<Car> cars) {
+		
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Enter the minimum price:");
+		
 		double minPrice = sc.nextDouble();
+		
 		sc.nextLine();
 		System.out.println("Enter the maximum price:");
 		double maxPrice = sc.nextDouble();
 		sc.nextLine();
 		System.out.println("Enter the engine type: PETROL/DIESEL");
+		
 		String engineType = sc.nextLine();
+		
 		System.out.println("Enter the minimum engine capacity: ");
 		double minEngineCapacity = sc.nextDouble();
 		sc.nextLine();
 		System.out.println("Enter the maximum engine capacity: ");
 		double maxEngineCapacity = sc.nextDouble();
 		sc.nextLine();
+		
+		System.out.println("Available equipment:");
+		List<EQUIPMENT> equipmentList = new ArrayList<EQUIPMENT>(EnumSet.allOf(EQUIPMENT.class));
+		equipmentList.forEach(System.out::println);
+		
 		System.out.println("Enter the required equipment: ");
-		
 		String equipment = sc.nextLine();
-		sc.close();
 		
-		Predicate<Car> pricePred = (Car c)-> c.getBasicPrice()>minPrice && c.getBasicPrice()<maxPrice;
-		Predicate<Car> enginePred = new Predicate<Car>(){
+		sc.close();
+
+		Predicate<Car> pricePred = (Car c) -> c.getBasicPrice() > minPrice && c.getBasicPrice() < maxPrice;
+		Predicate<Car> enginePred = new Predicate<Car>() {
 
 			@Override
 			public boolean test(Car c) {
 				ENGINETYPE type = null;
-				if(engineType.equals("DIESEL")){
+				if (engineType.equals("DIESEL")) {
 					type = ENGINETYPE.DIESEL;
-				} else if(engineType.equals("PETROL")){
+				} else if (engineType.equals("PETROL")) {
 					type = ENGINETYPE.PETROL;
-				} else{
+				} else {
 					type = null;
 				}
-				return c.getEngine().getType()==type;
+				return c.getEngine().getType() == type;
 			}
-			
+
 		};
+
+		Predicate<Car> engineCapacityPred = (Car c) -> c.getEngine().getEngineCapacity() > minEngineCapacity
+				&& c.getEngine().getEngineCapacity() < maxEngineCapacity;
 		
-		Predicate<Car> engineCapacityPred = (Car c)-> c.getEngine().getEngineCapacity()>minEngineCapacity&&c.getEngine().getEngineCapacity()<maxEngineCapacity;
-	/*	Predicate<Car> equipmentPred = new Predicate<Car>(){
+		
+		
+		Predicate<Car> equipmentPred = new Predicate<Car>() {
 
 			@Override
 			public boolean test(Car c) {
-				for(String s: )){
-					if(s.equals(equipment)){
+				for(EQUIPMENT e : c.getCarriage().getEquipment()){
+					if(equipment.equals(e.toString())){
 						return true;
 					}
 				}
-				return true;
+				return false;
 			}
-			
-		};*/
-		return null;
+
+		};
+		
+		List<Car> filteredByUserChoice = cars
+				.stream()
+				.filter(pricePred)
+				.filter(enginePred)
+				.filter(engineCapacityPred)
+				.filter(equipmentPred)
+				.collect(Collectors.toList());
+		
+		if(filteredByUserChoice.isEmpty()){
+			System.out.println("There are no cars which match your criteria.");
+		}
+		return filteredByUserChoice;
 
 	}
 
